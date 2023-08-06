@@ -536,7 +536,6 @@ export default class ObsidianGit extends Plugin {
 
         if (Platform.isDesktop) {
             const statusBlameItemEl = this.addStatusBarItem();
-            statusBlameItemEl.setText(new Date().toISOString());
             this.statusBlame = new StatusBlame(this, statusBlameItemEl, this.lineAuthoringFeature);
         }
 
