@@ -47,6 +47,7 @@ import { IgnoreModal } from "./ui/modals/ignoreModal";
 import GitView from "./ui/sourceControl/sourceControl";
 import { BranchStatusBar } from "./ui/statusBar/branchStatusBar";
 import { getNewLeaf, splitRemoteBranch } from "./utils";
+import { StatusBlame } from "./StatusBlame";
 
 export default class ObsidianGit extends Plugin {
     gitManager: GitManager;
@@ -73,6 +74,7 @@ export default class ObsidianGit extends Plugin {
     createEvent: EventRef;
     renameEvent: EventRef;
     lineAuthoringFeature: LineAuthoringFeature = new LineAuthoringFeature(this);
+    statusBlame: StatusBlame;
 
     debRefresh: Debouncer<any, void>;
 
@@ -531,6 +533,12 @@ export default class ObsidianGit extends Plugin {
                 this.handleFileMenu(menu, file, source);
             })
         );
+
+        if (Platform.isDesktop) {
+            const statusBlameItemEl = this.addStatusBarItem();
+            statusBlameItemEl.setText(new Date().toISOString());
+            this.statusBlame = new StatusBlame(this, statusBlameItemEl, this.lineAuthoringFeature);
+        }
 
         if (this.settings.showStatusBar) {
             // init statusBar
