@@ -22,65 +22,46 @@ export class StatusBlame {
 
     update_status(): void {
         const mdview = this.plugin.app.workspace.getActiveViewOfType(MarkdownView);
-        if (mdview) {
-            const Cursor = mdview.editor.getCursor();
-            const TargetFile = mdview.file;
-            const gita = this.lineAuthoringFeature.isAvailableOnCurrentPlatform();
+        if (mdview == null) { this.statusBarItemEl.setText("No blame"); return; }
+        const Cursor = mdview.editor.getCursor();
+        const TargetFile = mdview.file;
+        const gita = this.lineAuthoringFeature.isAvailableOnCurrentPlatform();
 
-            if (TargetFile && gita.available) {
+        if (TargetFile == null || gita.available == false) { this.statusBarItemEl.setText("No blame"); return; }
 
-                const TargetFilePath = TargetFile.path;
-                // console.log(TargetFilePath);
-                gita.gitManager.blame(TargetFilePath, "inactive", true).then((blame) => {
-                    if (blame !== "untracked") {
+        const TargetFilePath = TargetFile.path;
+        gita.gitManager.blame(TargetFilePath, "inactive", true).then((blame) => {
 
-                        const TargetHash = blame.hashPerLine[Cursor.line];
-                        const TargetBreamCommit = blame.commits.get(TargetHash);
+            if (blame === "untracked") { this.statusBarItemEl.setText("No blame"); return; }
 
-                        console.log(blame);
-                        console.log(TargetBreamCommit);
+            const TargetHash = blame.hashPerLine[Cursor.line];
+            const TargetBreamCommit = blame.commits.get(TargetHash);
 
-                        if (TargetBreamCommit?.author?.name === "Not Committed Yet") {
-                            this.statusBarItemEl.setText("No blame");
-                        }
+            if (TargetBreamCommit?.author?.name === "Not Committed Yet") { this.statusBarItemEl.setText("No blame"); return; }
+            if (TargetBreamCommit === undefined) { this.statusBarItemEl.setText("No blame"); return; }
 
-
-                        if (TargetBreamCommit !== undefined) {
-                            let deta = "";
-                            if (TargetBreamCommit.author) {
-                                let authoringDate: moment.Moment = moment.unix(
-                                    TargetBreamCommit.author.epochSeconds
-                                );
-                                authoringDate = authoringDate.utcOffset(
-                                    TargetBreamCommit.author.tz
-                                );
+            let deta = "";
+            if (TargetBreamCommit.author === undefined) { this.statusBarItemEl.setText("No blame"); return; }
 
 
-                                deta = authoringDate.year() + "年";
-                                deta += authoringDate.month() + 1 + "月";
-                                deta += authoringDate.date() + "日";
-                                deta += authoringDate.hour() + "時";
-                                deta += authoringDate.minute() + "分";
-                                deta += authoringDate.second() + "秒";
-                            }
-                            const author = TargetBreamCommit.author != null ? TargetBreamCommit.author.name : "";
+            let authoringDate: moment.Moment = moment.unix(
+                TargetBreamCommit.author.epochSeconds
+            );
+            authoringDate = authoringDate.utcOffset(
+                TargetBreamCommit.author.tz
+            );
 
-                            this.statusBarItemEl.setText(deta + " " + author);
-                        }
-                        else {
-                            this.statusBarItemEl.setText("No blame");
-                        }
+            deta = authoringDate.year() + "年";
+            deta += authoringDate.month() + 1 + "月";
+            deta += authoringDate.date() + "日";
+            deta += authoringDate.hour() + "時";
+            deta += authoringDate.minute() + "分";
+            deta += authoringDate.second() + "秒";
 
-                    } else {
-
-                        this.statusBarItemEl.setText("No blame");
-
-                    }
-                }).catch((err) => {
-                    console.log(err);
-                });
-            }
-        }
+            const author = TargetBreamCommit.author.name;
+            this.statusBarItemEl.setText(deta + " " + author);
+        }).catch((err) => {
+            console.log(err);
+        });
     }
-
 }
