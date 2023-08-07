@@ -1,3 +1,7 @@
+# このフォークのメモ
+
+右下にgit blameの日時(日本語)と名前を雑に表示するようにしてるだけの物。
+
 # Obsidian Git
 
 Plugin that allows you to back up your [Obsidian.md](https://obsidian.md) vault to a remote Git repository (e.g. private repo on GitHub).
